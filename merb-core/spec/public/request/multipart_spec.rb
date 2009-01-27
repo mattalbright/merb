@@ -40,4 +40,19 @@ describe Merb::Request do
       running {request.params}.should_not raise_error        
   end
   
+  it "should turn any part whose name starts with 'file_data' in to a file" do
+    m = Merb::Test::MultipartRequestHelper::Post.new :file_data_foo => 'barbaz'
+    body, head = m.to_multipart
+    request = fake_request({:request_method => "POST", :content_type => head, :content_length => body.length}, :req => body)
+    request.params[:file_data_foo].should_not be_nil
+    request.params[:file_data_foo][:tempfile].class.should == Tempfile
+  end
+  
+  it "should NOT turn everything into a file" do
+    m = Merb::Test::MultipartRequestHelper::Post.new :file_name => 'barbaz'
+    body, head = m.to_multipart
+    request = fake_request({:request_method => "POST", :content_type => head, :content_length => body.length}, :req => body)
+    request.params[:file_name].should_not be_nil
+    request.params[:file_name].class.should == String
+  end
 end

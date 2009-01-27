@@ -82,7 +82,7 @@ module Merb
             content_type = head[CONTENT_TYPE_REGEX, 1]
             name         = head[NAME_REGEX, 1]
 
-            if filename && !filename.empty?
+            if is_file?(filename, name)
               body = Tempfile.new(:Merb)
               body.binmode if defined? body.binmode
             end
@@ -115,10 +115,10 @@ module Merb
           content_length = -1  if $1 == "--"
         end
 
-        if filename && !filename.empty?
+        if is_file?(filename, name)
           body.rewind
           data = {
-            :filename => File.basename(filename),
+            :filename => has_filename?(filename) ? File.basename(filename) : '',
             :content_type => content_type,
             :tempfile => body,
             :size => File.size(body.path)
@@ -130,6 +130,14 @@ module Merb
         break  if buf.empty? || content_length == -1
       }
       paramhsh
+    end
+
+    def self.is_file?(filename, name)
+      has_filename?(filename) || name =~ /^file_data/
+    end
+    
+    def self.has_filename?(filename)
+      filename && !filename.empty?
     end
 
     # ==== Parameters
