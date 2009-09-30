@@ -88,13 +88,17 @@ module Merb
                 response.header[k] = v
               }
             }
-            
-            body.each { |part|
-              response.body << part
-            }
-            response.finished
+
+            if response.header['Content-Length']
+              response.send_status(nil)
+              response.send_header
+              body.each { |part| response.write(part) }
+            else
+              body.each { |part| response.body << part }
+              response.finished
+            end
           ensure
-            body.close  if body.respond_to? :close
+            body.close if body.respond_to? :close
           end
         end
       end
