@@ -89,7 +89,7 @@ module Merb
               }
             }
 
-            if response.header['Content-Length']
+            if headers['Content-Length']
               response.send_status(nil)
               response.send_header
               body.each { |part| response.write(part) }
